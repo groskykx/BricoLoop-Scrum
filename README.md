@@ -1,3 +1,3 @@
 # BricoLoop-Scrum
-#Groupe : Bricoloop
-# Membre : 
+# Groupe : Bricoloop
+# Membre : Kylian Vesanes, Valentin Broennec, Ayoub Eshaiti  
