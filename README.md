@@ -49,6 +49,7 @@ Vérification rapide : `GET http://localhost:3000/health` doit répondre `{ "sta
 | Story | Description | PR |
 |---|---|---|
 | T-01 | Dépôt Git de l'équipe et README | #1 |
+| T-02 | Outillage qualité : lint, tests, `npm run check`, `GET /health` | #2 |
 
 ## Vidéo
 
