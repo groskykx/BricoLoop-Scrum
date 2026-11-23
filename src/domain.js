@@ -22,6 +22,12 @@ export function isValidDate(value) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
+// US-06 · Deux périodes se chevauchent si chacune commence avant (ou le jour où) l'autre finit.
+// Bornes incluses : un prêt du 10 au 15 bloque une demande qui commence le 15.
+export function overlaps(a, b) {
+  return a.startDate <= b.endDate && b.startDate <= a.endDate;
+}
+
 // Date du jour au format AAAA-MM-JJ. Les dates de ce format se comparent comme des chaînes.
 export function today() {
   return new Date().toISOString().slice(0, 10);
