@@ -1,8 +1,23 @@
 import { Router } from 'express';
+import { TOOL_STATUS } from '../domain.js';
 
-// Routes /api/tools. Les stories US-01, US-02 et US-03 viennent s'ajouter ici.
+// Ordre d'affichage du catalogue : les outils disponibles d'abord.
+const STATUS_ORDER = {
+  [TOOL_STATUS.AVAILABLE]: 0,
+  [TOOL_STATUS.LENT]: 1,
+  [TOOL_STATUS.UNAVAILABLE]: 2,
+};
+
 export function toolsRouter(store) {
   const router = Router();
-  void store;
+
+  // US-01 · Consulter le catalogue des outils
+  router.get('/', (req, res) => {
+    const catalogue = [...store.tools]
+      .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status])
+      .map(({ id, name, category, status }) => ({ id, name, category, status }));
+    res.json(catalogue);
+  });
+
   return router;
 }
