@@ -51,6 +51,7 @@ Vérification rapide : `GET http://localhost:3000/health` doit répondre `{ "sta
 | T-01 | Dépôt Git de l'équipe et README | #1 |
 | T-02 | Outillage qualité : lint, tests, `npm run check`, `GET /health` | #2 |
 | T-03 | Données de démo : 4 voisins, 8 outils chargés au démarrage | #3 |
+| T-04 | Intégration continue GitHub Actions (`npm run check` sur chaque PR) | #5 |
 | US-01 | Consulter le catalogue des outils (`GET /api/tools`, disponibles en premier) | #4 |
 
 ## Vidéo
