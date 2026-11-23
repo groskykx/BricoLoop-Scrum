@@ -53,5 +53,31 @@ export function loansRouter(store) {
     return res.status(201).json(loan);
   });
 
+  // US-05 · Accepter ou refuser une demande
+  // Les autres demandes en attente sur le même outil restent en attente (décision PO, Sprint 2).
+  // Le contrôle de chevauchement des dates relève de US-06.
+  const decide = (newStatus) => (req, res) => {
+    const loan = store.loans.find((l) => l.id === req.params.id);
+    if (!loan) {
+      return res.status(404).json({ error: 'Demande introuvable' });
+    }
+    const tool = store.tools.find((t) => t.id === loan.toolId);
+    if (!tool || tool.ownerId !== req.user.id) {
+      return res.status(403).json({ error: "Seul le propriétaire de l'outil peut répondre à cette demande" });
+    }
+    if (loan.status !== LOAN_STATUS.PENDING) {
+      return res.status(409).json({ error: 'Cette demande a déjà reçu une réponse' });
+    }
+
+    loan.status = newStatus;
+    if (newStatus === LOAN_STATUS.ACCEPTED) {
+      tool.status = TOOL_STATUS.LENT;
+    }
+    return res.json(loan);
+  };
+
+  router.post('/:id/accept', requireUser, decide(LOAN_STATUS.ACCEPTED));
+  router.post('/:id/refuse', requireUser, decide(LOAN_STATUS.REFUSED));
+
   return router;
 }
