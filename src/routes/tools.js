@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { TOOL_STATUS } from '../domain.js';
+import { validateNewTool } from '../validation.js';
+import { requireUser } from '../middleware/currentUser.js';
 
 // Ordre d'affichage du catalogue : les outils disponibles d'abord.
 const STATUS_ORDER = {
@@ -35,6 +37,25 @@ export function toolsRouter(store) {
       status: tool.status,
       owner: owner ? { firstName: owner.firstName, district: owner.district } : null,
     });
+  });
+
+  // US-02 · Proposer un outil au prêt
+  router.post('/', requireUser, (req, res) => {
+    const error = validateNewTool(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.message, field: error.field });
+    }
+
+    const tool = {
+      id: store.nextId('t'),
+      ownerId: req.user.id,
+      name: req.body.name.trim(),
+      category: req.body.category,
+      description: req.body.description ?? '',
+      status: TOOL_STATUS.AVAILABLE,
+    };
+    store.tools.push(tool);
+    return res.status(201).json(tool);
   });
 
   return router;
