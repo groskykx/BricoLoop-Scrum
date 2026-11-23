@@ -2,6 +2,7 @@ import express from 'express';
 import { createStore } from './store.js';
 import { currentUser } from './middleware/currentUser.js';
 import { toolsRouter } from './routes/tools.js';
+import { loansRouter } from './routes/loans.js';
 
 // Crée l'application sans ouvrir de port : les tests l'importent directement.
 export function createApp({ store = createStore() } = {}) {
@@ -11,6 +12,7 @@ export function createApp({ store = createStore() } = {}) {
 
   app.get('/health', (req, res) => res.json({ status: 'ok' }));
   app.use('/api/tools', toolsRouter(store));
+  app.use('/api/loans', loansRouter(store));
 
   return app;
 }
