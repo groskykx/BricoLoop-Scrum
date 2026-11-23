@@ -1,10 +1,23 @@
 import { Router } from 'express';
-import { LOAN_STATUS, TOOL_STATUS, isValidDate, today } from '../domain.js';
+import { LOAN_STATUS, TOOL_STATUS, isValidDate, overlaps, today } from '../domain.js';
 import { requireUser } from '../middleware/currentUser.js';
 
 function badRequest(res, field, message) {
   return res.status(400).json({ error: message, field });
 }
+
+// US-06 · Seuls les prêts acceptés bloquent des dates ; les demandes en attente peuvent se chevaucher.
+function conflictsWithAcceptedLoan(store, period, ignoredLoanId) {
+  return store.loans.some(
+    (loan) =>
+      loan.toolId === period.toolId &&
+      loan.id !== ignoredLoanId &&
+      loan.status === LOAN_STATUS.ACCEPTED &&
+      overlaps(loan, period),
+  );
+}
+
+const OVERLAP_ERROR = { error: 'Ces dates chevauchent un prêt déjà accepté pour cet outil' };
 
 export function loansRouter(store) {
   const router = Router();
@@ -39,6 +52,9 @@ export function loansRouter(store) {
     if (tool.status === TOOL_STATUS.UNAVAILABLE) {
       return res.status(409).json({ error: 'Cet outil est indisponible pour le moment' });
     }
+    if (conflictsWithAcceptedLoan(store, { toolId, startDate, endDate })) {
+      return res.status(409).json(OVERLAP_ERROR);
+    }
 
     // Un outil « prêté » peut être demandé pour des dates futures (décision PO, Sprint 2).
     const loan = {
@@ -55,7 +71,7 @@ export function loansRouter(store) {
 
   // US-05 · Accepter ou refuser une demande
   // Les autres demandes en attente sur le même outil restent en attente (décision PO, Sprint 2).
-  // Le contrôle de chevauchement des dates relève de US-06.
+  // US-06 : une acceptation qui chevaucherait un prêt déjà accepté est refusée.
   const decide = (newStatus) => (req, res) => {
     const loan = store.loans.find((l) => l.id === req.params.id);
     if (!loan) {
@@ -67,6 +83,9 @@ export function loansRouter(store) {
     }
     if (loan.status !== LOAN_STATUS.PENDING) {
       return res.status(409).json({ error: 'Cette demande a déjà reçu une réponse' });
+    }
+    if (newStatus === LOAN_STATUS.ACCEPTED && conflictsWithAcceptedLoan(store, loan, loan.id)) {
+      return res.status(409).json(OVERLAP_ERROR);
     }
 
     loan.status = newStatus;
