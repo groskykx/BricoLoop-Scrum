@@ -1,0 +1,113 @@
+### BricoLoop · requêtes de démo, dans l'ordre d'un vrai usage
+### Extension VS Code « REST Client » : cliquer sur « Send Request » au-dessus de chaque requête.
+### Lancer l'API avant : npm start. Relancer npm start pour repartir des données de démo.
+### Utilisateurs : u1 Camille · u2 Yanis · u3 Léa · u4 Hugo
+
+@base = http://localhost:3000
+
+### 0 · Santé de l'API
+GET {{base}}/health
+
+### ─────────────── US-01 · Catalogue ───────────────
+### Les outils disponibles d'abord : le taille-haie t2, indisponible, arrive en dernier
+GET {{base}}/api/tools
+
+### ─────────────── US-03 · Fiche d'un outil ───────────────
+### Perceuse t1, avec le prénom et le quartier de sa propriétaire (Camille, Centre)
+GET {{base}}/api/tools/t1
+
+### Erreur : identifiant inconnu → 404
+GET {{base}}/api/tools/inconnu
+
+### ─────────────── US-02 · Proposer un outil ───────────────
+### Léa (u3) propose une scie sauteuse → 201, statut « available »
+POST {{base}}/api/tools
+X-User-Id: u3
+Content-Type: application/json
+
+{ "name": "Scie sauteuse", "category": "Perçage", "description": "Lames bois et métal." }
+
+### Erreur : nom trop court → 400, field = name
+POST {{base}}/api/tools
+X-User-Id: u3
+Content-Type: application/json
+
+{ "name": "S", "category": "Perçage" }
+
+### ─────────────── US-04 · Demander un outil ───────────────
+### Yanis (u2) demande la perceuse t1 du 10 au 15 mars 2099 → 201, statut « pending »
+# @name demandeYanis
+POST {{base}}/api/loans
+X-User-Id: u2
+Content-Type: application/json
+
+{ "toolId": "t1", "startDate": "2099-03-10", "endDate": "2099-03-15" }
+
+### Erreur : date de fin avant la date de début → 400, field = endDate
+POST {{base}}/api/loans
+X-User-Id: u2
+Content-Type: application/json
+
+{ "toolId": "t1", "startDate": "2099-03-15", "endDate": "2099-03-10" }
+
+### Erreur : outil indisponible (taille-haie t2) → 409
+POST {{base}}/api/loans
+X-User-Id: u3
+Content-Type: application/json
+
+{ "toolId": "t2", "startDate": "2099-03-10", "endDate": "2099-03-15" }
+
+### Léa (u3) demande aussi la perceuse, du 12 au 14 mars : les demandes en attente peuvent se chevaucher → 201
+# @name demandeLea
+POST {{base}}/api/loans
+X-User-Id: u3
+Content-Type: application/json
+
+{ "toolId": "t1", "startDate": "2099-03-12", "endDate": "2099-03-14" }
+
+### ─────────────── US-05 · Accepter ou refuser ───────────────
+### Erreur : Hugo (u4) n'est pas le propriétaire → 403
+POST {{base}}/api/loans/{{demandeYanis.response.body.id}}/accept
+X-User-Id: u4
+
+### Camille (u1), propriétaire, accepte la demande de Yanis → 200, « accepted », la perceuse passe « lent »
+POST {{base}}/api/loans/{{demandeYanis.response.body.id}}/accept
+X-User-Id: u1
+
+### La fiche montre maintenant la perceuse « lent »
+GET {{base}}/api/tools/t1
+
+### ─────────────── US-06 · Pas de chevauchement ───────────────
+### Erreur : accepter Léa chevaucherait le prêt de Yanis → 409
+POST {{base}}/api/loans/{{demandeLea.response.body.id}}/accept
+X-User-Id: u1
+
+### Camille refuse donc la demande de Léa → 200, « refused »
+POST {{base}}/api/loans/{{demandeLea.response.body.id}}/refuse
+X-User-Id: u1
+
+### Erreur : une nouvelle demande sur ces dates → 409
+POST {{base}}/api/loans
+X-User-Id: u4
+Content-Type: application/json
+
+{ "toolId": "t1", "startDate": "2099-03-14", "endDate": "2099-03-18" }
+
+### Une demande à partir du lendemain du prêt → 201
+POST {{base}}/api/loans
+X-User-Id: u4
+Content-Type: application/json
+
+{ "toolId": "t1", "startDate": "2099-03-16", "endDate": "2099-03-20" }
+
+### ─────────────── US-07 · Retour ───────────────
+### Erreur : Yanis, l'emprunteur, ne peut pas déclarer le retour → 403
+POST {{base}}/api/loans/{{demandeYanis.response.body.id}}/return
+X-User-Id: u2
+
+### Camille déclare le retour → 200, « returned », la perceuse redevient « available »
+POST {{base}}/api/loans/{{demandeYanis.response.body.id}}/return
+X-User-Id: u1
+
+### La perceuse est de nouveau disponible dans le catalogue
+GET {{base}}/api/tools/t1
