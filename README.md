@@ -41,7 +41,7 @@ Vérification rapide : `GET http://localhost:3000/health` doit répondre `{ "sta
 
 - Une branche par story, créée depuis `main` à jour : `chore/T-02-outillage`, `feature/US-01-catalogue`…
 - Commits préfixés : `feat:`, `fix:`, `test:`, `refactor:`, `chore:`, `docs:`.
-- `npm run check` doit passer avant chaque push.
+- `npm run check` doit passer avant chaque push. La CI GitHub Actions le relance sur chaque pull request : une PR rouge ne se merge pas.
 - Personne ne pousse sur `main` : chaque branche part en pull request, relue, approuvée et mergée par un autre membre.
 
 ## Stories Done
