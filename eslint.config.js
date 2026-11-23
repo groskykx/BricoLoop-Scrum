@@ -11,4 +11,11 @@ export default [
       globals: { ...globals.node },
     },
   },
+  {
+    // US-09 · Interface web : code exécuté dans le navigateur.
+    files: ['public/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.browser },
+    },
+  },
 ];

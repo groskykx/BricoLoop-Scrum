@@ -39,12 +39,16 @@ Vérification rapide : `GET http://localhost:3000/health` doit répondre `{ "sta
 
 L'utilisateur courant est choisi avec l'en-tête HTTP `X-User-Id` : `u1` (Camille), `u2` (Yanis), `u3` (Léa) ou `u4` (Hugo) dans les données de démo.
 
-**Démo :** le fichier [`demo.http`](demo.http) rejoue tout le parcours, requête par requête, avec l'extension VS Code « REST Client » (bouton *Send Request* au-dessus de chaque requête).
+**Interface web :** après `npm start`, ouvrir **http://localhost:3000/**. On choisit son profil en haut de la page, on clique sur un outil du panneau pour voir sa fiche et le demander, puis on prend le profil du propriétaire pour accepter, refuser ou déclarer le retour. Les erreurs de l'API s'affichent dans le bandeau.
+
+**Démo par requêtes :** le fichier [`demo.http`](demo.http) rejoue tout le parcours, requête par requête, avec l'extension VS Code « REST Client » (bouton *Send Request* au-dessus de chaque requête).
 
 ## API
 
 | Méthode et route | Story | Rôle | Codes |
 |---|---|---|---|
+| `GET /` | US-09 | Interface web | 200 |
+| `GET /api/users` | US-09 | Profils des voisins, pour l'interface | 200 |
 | `GET /health` | T-02 | Santé de l'API | 200 |
 | `GET /api/tools` | US-01 | Catalogue, outils disponibles en premier | 200 |
 | `GET /api/tools/:id` | US-03 | Fiche d'un outil et de son propriétaire | 200, 404 |
@@ -80,7 +84,9 @@ Les dates sont au format `AAAA-MM-JJ`. Catégories : Perçage, Jardinage, Peintu
 | US-06 | Empêcher les prêts qui se chevauchent | #16 |
 | US-07 | Déclarer le retour d'un outil | #17 |
 
-Non réalisées (Product Backlog) : US-08 à US-14, dont US-09 (interface web).
+| US-09 | Interface web du parcours d'emprunt | #19 |
+
+Non réalisées (Product Backlog) : US-08 et US-10 à US-14.
 
 ## Livrables
 

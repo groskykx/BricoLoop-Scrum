@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BricoLoop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <h1>BricoLoop</h1>
+      <p>Les outils du quartier, prêtés entre voisins.</p>
+    </div>
+    <label class="profile">
+      <span>Je suis</span>
+      <select id="profile" aria-describedby="profile-hint"></select>
+    </label>
+    <p id="profile-hint" class="sr-only">Le profil choisi est utilisé pour toutes les actions de la page.</p>
+  </header>
+
+  <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+
+  <main class="layout">
+    <section class="board" aria-labelledby="board-title">
+      <div class="board-head">
+        <h2 id="board-title">Le panneau du quartier</h2>
+        <p id="board-count"></p>
+      </div>
+      <ul id="catalogue" class="pegboard"></ul>
+    </section>
+
+    <aside class="bench">
+      <section id="detail" class="panel detail" aria-live="polite">
+        <p class="empty">Choisissez un outil sur le panneau pour voir sa fiche et le demander.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="loans-title">
+        <h2 id="loans-title">Demandes</h2>
+        <p class="hint">Les demandes envoyées depuis cette page. Pour accepter, refuser ou déclarer un retour, prenez le profil du propriétaire.</p>
+        <ol id="loans" class="loans"></ol>
+      </section>
+
+      <details class="panel lend">
+        <summary>Proposer un de mes outils</summary>
+        <form id="new-tool" class="form">
+          <label>Nom de l’outil
+            <input name="name" required minlength="2" maxlength="60" placeholder="Scie sauteuse">
+          </label>
+          <label>Catégorie
+            <select name="category">
+              <option>Perçage</option><option>Jardinage</option><option>Peinture</option>
+              <option>Nettoyage</option><option>Mesure</option><option>Autre</option>
+            </select>
+          </label>
+          <label>Description <span class="optional">(facultative)</span>
+            <textarea name="description" maxlength="300" rows="2" placeholder="Lames fournies, batterie chargée…"></textarea>
+          </label>
+          <button type="submit" class="button">Mettre sur le panneau</button>
+        </form>
+      </details>
+    </aside>
+  </main>
+</body>
+</html>
