@@ -79,5 +79,24 @@ export function loansRouter(store) {
   router.post('/:id/accept', requireUser, decide(LOAN_STATUS.ACCEPTED));
   router.post('/:id/refuse', requireUser, decide(LOAN_STATUS.REFUSED));
 
+  // US-07 · Déclarer le retour d'un outil
+  router.post('/:id/return', requireUser, (req, res) => {
+    const loan = store.loans.find((l) => l.id === req.params.id);
+    if (!loan) {
+      return res.status(404).json({ error: 'Prêt introuvable' });
+    }
+    const tool = store.tools.find((t) => t.id === loan.toolId);
+    if (!tool || tool.ownerId !== req.user.id) {
+      return res.status(403).json({ error: "Seul le propriétaire de l'outil peut déclarer son retour" });
+    }
+    if (loan.status !== LOAN_STATUS.ACCEPTED) {
+      return res.status(409).json({ error: 'Seul un prêt accepté peut être déclaré rendu' });
+    }
+
+    loan.status = LOAN_STATUS.RETURNED;
+    tool.status = TOOL_STATUS.AVAILABLE;
+    return res.json(loan);
+  });
+
   return router;
 }
